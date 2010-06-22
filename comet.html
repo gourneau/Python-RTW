@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<title>Orbited + Morbid + js.io</title>
+
+<script src="http://localhost:9000/static/Orbited.js"></script>
+<script>
+TCPSocket = Orbited.TCPSocket
+</script>
+<script src="http://localhost:9000/static/protocols/stomp/stomp.js"></script>
+<script type="text/javascript" src="jquery-1.4.2.min.js"></script>
+
+<script>
+
+    // In production use your js toolkit's onload system, or event listeners
+    onload = function() {
+        
+        stomp = new STOMPClient();
+        stomp.onopen = function() {
+        };
+        stomp.onclose = function(c) { alert('Lost Connection, Code: ' + c);};
+        stomp.onerror = function(error) {
+            alert("Error: " + error);
+        };
+        stomp.onerrorframe = function(frame) {
+            alert("Error: " + frame.body);
+        };
+        stomp.onconnectedframe = function() {
+            stomp.subscribe("/topic/test");
+        };
+        stomp.onmessageframe = function(frame) {
+	    console.log(frame.body);
+	    $('#log').append("<p>" + frame.body + "</p>");
+        };
+        stomp.connect('localhost', 61613);
+    }
+</script>
+
+<h1>Simple Real-Time Data</h1>
+
+<div id="log"></div>

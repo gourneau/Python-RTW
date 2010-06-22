@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html>
+<!--
+Copyright 2010 The Closure Library Authors. All Rights Reserved.
+
+Use of this source code is governed by an Apache 2.0 License.
+See the COPYING file for details.
+-->
+<head>
+  <title>websocket gauge</title>
+  <link rel="stylesheet" href="css/demo.css">
+  <style>
+    .type { font-size:14px; font-weight:bold; font-family:arial; background-color:#f7f7f7; text-align:center }
+  </style>
+  <script src="../base.js"></script>
+  <script>
+    goog.require('goog.dom');
+    goog.require('goog.fx');
+    goog.require('goog.graphics');
+    goog.require('goog.graphics.Font');
+    goog.require('goog.graphics.LinearGradient');
+    goog.require('goog.graphics.SolidFill');
+    goog.require('goog.graphics.Stroke');
+    goog.require('goog.ui.Gauge');
+    goog.require('goog.ui.GaugeTheme');
+    goog.require('goog.json');
+  </script>
+  <script>
+
+
+    var interactiveGauge;
+
+    function setupGauges() {
+
+      interactiveGauge = new goog.ui.Gauge(300, 200);
+      interactiveGauge.addBackgroundColor(0, 30, goog.ui.Gauge.RED);
+      interactiveGauge.addBackgroundColor(75, 90, goog.ui.Gauge.YELLOW);
+      interactiveGauge.addBackgroundColor(90, 100, goog.ui.Gauge.RED);
+      interactiveGauge.setTitleTop("Awesomeness");
+      interactiveGauge.setTicks(5, 2);
+      interactiveGauge.setMajorTickLabels(['Idle', '20%', '40%', '60%', '80%', 'Argh']);
+      setValue();
+      interactiveGauge.render(document.getElementById('interactive'));
+
+    }
+
+    function setValue() {
+      var sv = document.getElementById("v1").value
+      var v = parseInt(sv, 10);
+      if (isNaN(v)) {
+        v = 0;
+      }
+      interactiveGauge.setValue(v, v + "%");
+    }
+  </script>
+  
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://127.0.0.1:8080/ws/echo");
+        ws.onmessage = function(evt) {
+            try{
+              jeval = goog.json.parse(evt.data);
+              console.log(jeval);
+              value = Math.round(jeval.fader1 * 100);
+              console.log(value);
+              interactiveGauge.setValue(value, value + "%");
+            }catch(error){
+              console.log("error");
+            }
+            
+        };
+        window.send_data = function() {
+            ws.send(document.getElementById("send_input").value);
+        };
+    </script>
+
+</head>
+
+<body>
+  <h1>goog.ui.Gauge + websockets</h1>
+  <table border="1">
+    <tr valign="top">
+      <td class="type">
+        Value change, formatted value, tick labels
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 300px">
+        <span id="interactive"></span>
+        <center>
+          <input type="text" size="3" value="22" id="v1" />
+          <input type="button" onclick="setValue()" value="Set" />
+        </center>
+      </td>
+    </tr>
+  </table>
+  <script>
+  setupGauges();
+  </script>
+</body>
+</html>
